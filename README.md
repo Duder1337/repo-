@@ -128,6 +128,11 @@ Zasady rozgrywek:
 - Losowanie map odbywa się krótko przed rozpoczęciem meczu.
 - Zwycięskie drużyny przechodzą do kolejnego etapu drabinki.
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 6ca384cb4d97e464ea07b29a7fd2f8ae1bab94be
 ## 11\. Kompletny panel administratora
 
 Stworzenie rozbudowanego panelu administracyjnego, który umożliwi zarządzanie wszystkimi najważniejszymi elementami platformy NEXORA ESPORTS.
