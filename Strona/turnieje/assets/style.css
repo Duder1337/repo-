@@ -1,0 +1,15 @@
+:root{--bg:#0f1220;--panel:#1a1f36;--tekst:#e8eaf6;--akcent:#7c5cff;--blad:#ff6b6b;--ok:#4cd98a}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--tekst);line-height:1.5}
+a{color:var(--akcent);text-decoration:none}
+.pasek{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;padding:12px 20px;background:var(--panel)}
+.pasek nav{display:flex;flex-wrap:wrap;gap:16px}
+.logo{font-weight:700;font-size:1.2rem;color:var(--tekst)}
+.kontener{max-width:960px;margin:24px auto;padding:0 16px}
+.stopka{text-align:center;padding:24px;opacity:.6}
+.formularz{display:flex;flex-direction:column;gap:12px;max-width:380px}
+.formularz input{width:100%;padding:10px;border-radius:6px;border:1px solid #333a5c;background:var(--panel);color:var(--tekst)}
+button,.przycisk{padding:10px 16px;border:0;border-radius:6px;background:var(--akcent);color:#fff;cursor:pointer;font-size:1rem}
+.blad{color:var(--blad)} .ok{color:var(--ok)}
+table{width:100%;border-collapse:collapse;background:var(--panel)}
+th,td{padding:10px;text-align:left;border-bottom:1px solid #2a3050}
