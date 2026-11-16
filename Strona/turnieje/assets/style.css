@@ -1,15 +1,203 @@
-:root{--bg:#0f1220;--panel:#1a1f36;--tekst:#e8eaf6;--akcent:#7c5cff;--blad:#ff6b6b;--ok:#4cd98a}
+:root{
+  --bg:#0b0d14; --panel:#131722; --panel2:#1a2030; --linia:#242b3f;
+  --tekst:#e9ecf5; --przyg:#8b93a7; --akcent:#ffb020; --akcent-t:#1a1200;
+  --blad:#ff6b6b; --ok:#4cd98a;
+}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--tekst);line-height:1.5}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--tekst);line-height:1.5}
 a{color:var(--akcent);text-decoration:none}
-.pasek{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;padding:12px 20px;background:var(--panel)}
-.pasek nav{display:flex;flex-wrap:wrap;gap:16px}
-.logo{font-weight:700;font-size:1.2rem;color:var(--tekst)}
-.kontener{max-width:960px;margin:24px auto;padding:0 16px}
-.stopka{text-align:center;padding:24px;opacity:.6}
-.formularz{display:flex;flex-direction:column;gap:12px;max-width:380px}
-.formularz input{width:100%;padding:10px;border-radius:6px;border:1px solid #333a5c;background:var(--panel);color:var(--tekst)}
-button,.przycisk{padding:10px 16px;border:0;border-radius:6px;background:var(--akcent);color:#fff;cursor:pointer;font-size:1rem}
+a:hover{text-decoration:underline}
+h1{font-size:1.9rem;margin:.2em 0 .6em}
+h2{font-size:1.1rem;letter-spacing:.04em;text-transform:uppercase;color:var(--przyg);margin:1.6em 0 .8em}
+.przygaszony{color:var(--przyg)}
+
+/* Układ: menu boczne + treść */
+.uklad{display:flex;min-height:100vh}
+.boczne{width:240px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--linia);
+  padding:18px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{display:flex;align-items:center;gap:10px;font-size:1.6rem;color:var(--tekst);padding:4px 10px 18px}
+.logo:hover{text-decoration:none}
+.logo span{display:flex;flex-direction:column;font-weight:800;font-size:1.05rem;line-height:1.1;letter-spacing:.06em}
+.logo small{color:var(--akcent);font-size:.7rem;letter-spacing:.25em}
+.sekcja{margin:18px 10px 6px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--przyg)}
+.poz{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--tekst);font-weight:500}
+.poz:hover{background:var(--panel2);text-decoration:none}
+.poz.aktywne{background:var(--panel2);box-shadow:inset 3px 0 0 var(--akcent)}
+.glowna{flex:1;min-width:0;display:flex;flex-direction:column}
+.gora{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 28px;
+  border-bottom:1px solid var(--linia);background:var(--bg);position:sticky;top:0;z-index:5}
+.sciezka{font-size:.75rem;letter-spacing:.1em;color:var(--przyg)}
+.konto{display:flex;align-items:center;gap:16px;font-size:.85rem;font-weight:600}
+.nick{color:var(--przyg)}
+.kontener{width:100%;max-width:1200px;margin:0 auto;padding:24px 28px;flex:1}
+.stopka{text-align:center;padding:24px;color:var(--przyg);font-size:.85rem}
+
+/* Przyciski */
+button,.przycisk{display:inline-block;padding:10px 18px;border:0;border-radius:8px;background:var(--akcent);
+  color:var(--akcent-t);font-weight:700;cursor:pointer;font-size:.95rem}
+button:hover,.przycisk:hover{filter:brightness(1.08);text-decoration:none}
+.przycisk.maly{padding:7px 14px;font-size:.85rem}
+.przycisk.drugi,button.drugi{background:var(--panel2);color:var(--tekst);border:1px solid var(--linia)}
+
+/* Hero */
+.hero{display:flex;flex-wrap:wrap;gap:28px;justify-content:space-between;align-items:center;
+  padding:40px;border-radius:16px;border:1px solid var(--linia);
+  background:radial-gradient(600px 300px at 85% 0%,rgba(255,176,32,.18),transparent 60%),
+             radial-gradient(500px 300px at 0% 100%,rgba(124,92,255,.22),transparent 60%),var(--panel)}
+.hero-nad{color:var(--akcent);letter-spacing:.3em;font-size:.75rem;font-weight:700}
+.hero h1{font-size:2.6rem;line-height:1.1;margin:.3em 0}
+.hero p{color:var(--przyg);max-width:460px}
+.hero-przyciski{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.hero-statystyki{display:grid;grid-template-columns:repeat(2,minmax(130px,1fr));gap:12px}
+
+/* Kafelki statystyk */
+.stat{background:var(--bg);border:1px solid var(--akcent);border-radius:10px;padding:12px 16px;text-align:center;
+  box-shadow:0 0 0 1px rgba(255,176,32,.1) inset}
+.stat small{display:block;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przyg)}
+.stat b{font-size:1.5rem;color:var(--akcent)}
+.info-kafle{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+
+/* Karty turniejów */
+.naglowek-sekcji{display:flex;justify-content:space-between;align-items:baseline}
+.siatka-kart{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.karta{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--linia);border-radius:14px;
+  padding:10px;color:var(--tekst);transition:transform .15s,border-color .15s}
+.karta:hover{transform:translateY(-3px);border-color:var(--akcent);text-decoration:none}
+.karta-img{position:relative;height:150px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,hsl(var(--h) 60% 30%),hsl(calc(var(--h) + 50) 70% 12%));overflow:hidden}
+.karta-gra{font-size:1.6rem;font-weight:800;text-align:center;padding:0 10px;text-transform:uppercase;
+  letter-spacing:.05em;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+.karta-tresc{padding:12px 6px 4px;flex:1}
+.karta-tresc small{color:var(--przyg);text-transform:uppercase;font-size:.7rem;letter-spacing:.06em}
+.karta-tresc h3{margin:.2em 0 .6em;font-size:1.05rem;text-transform:uppercase}
+.tagi{display:flex;flex-wrap:wrap;gap:6px}
+.tagi span{background:var(--panel2);border-radius:5px;padding:3px 9px;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+.karta-stopka{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--linia);
+  margin-top:12px;padding:10px 6px 2px;font-size:.7rem;color:var(--przyg);letter-spacing:.08em}
+.karta-stopka b{font-size:1.1rem;color:var(--tekst)}
+
+/* Plakietki statusu */
+.plakietka{position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:5px;font-size:.7rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;background:#000;color:#fff}
+.plakietka.st-otwarty{background:var(--ok);color:#04210f}
+.plakietka.st-trakcie{background:var(--akcent);color:var(--akcent-t)}
+.plakietka.st-koniec{background:#444b66;color:#fff}
+.plakietka.st-anulowany{background:var(--blad);color:#2a0505}
+.plakietka.st-szkic{background:#000;color:#fff;border:1px dashed var(--przyg)}
+
+/* Strona turnieju */
+.baner-turnieju{position:relative;padding:60px 28px 28px;border-radius:16px;border:1px solid var(--linia);
+  background:linear-gradient(135deg,hsl(var(--h) 55% 24%),hsl(calc(var(--h) + 50) 65% 10%))}
+.baner-turnieju small{text-transform:uppercase;letter-spacing:.2em;color:#ffffffb0}
+.baner-turnieju h1{margin:.1em 0;font-size:2.2rem;text-transform:uppercase}
+.zwyciezca{margin:.4em 0 0;font-size:1.1rem}
+
+/* Filtry i stronicowanie */
+.filtry{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:20px}
+.filtry label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--przyg)}
+select,input{font:inherit}
+select{padding:9px 12px;border-radius:8px;border:1px solid var(--linia);background:var(--panel);color:var(--tekst)}
+.strony{display:flex;gap:10px;justify-content:center;margin-top:24px}
+.strony a,.strony strong{padding:6px 12px;border-radius:6px;background:var(--panel)}
+.strony strong{background:var(--akcent);color:var(--akcent-t)}
+
+/* Formularze */
+.formularz{display:flex;flex-direction:column;gap:14px;max-width:400px;background:var(--panel);
+  border:1px solid var(--linia);border-radius:14px;padding:24px}
+.formularz label{display:flex;flex-direction:column;gap:5px;font-size:.85rem;color:var(--przyg)}
+.formularz input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--linia);
+  background:var(--bg);color:var(--tekst)}
+.formularz input:focus,select:focus{outline:2px solid var(--akcent);outline-offset:0}
 .blad{color:var(--blad)} .ok{color:var(--ok)}
+
+/* Tabele */
+.tabela-wrap{overflow-x:auto;border:1px solid var(--linia);border-radius:12px}
 table{width:100%;border-collapse:collapse;background:var(--panel)}
-th,td{padding:10px;text-align:left;border-bottom:1px solid #2a3050}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--przyg);background:var(--panel2)}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--linia)}
+tr:last-child td{border-bottom:0}
+form.inline{display:inline}
+.akcje{white-space:nowrap}
+.akcje button{padding:5px 12px;font-size:.8rem}
+
+/* Telefony i wąskie ekrany */
+@media (max-width:860px){
+  .uklad{display:block}
+  .boczne{width:auto;height:auto;position:static;display:flex;align-items:center;gap:8px;padding:10px;overflow-x:auto}
+  .boczne nav{display:flex;gap:4px}
+  .logo{padding:0 8px;white-space:nowrap}
+  .sekcja{display:none}
+  .poz{white-space:nowrap;padding:8px 12px}
+  .gora{position:static;padding:12px 16px}
+  .kontener{padding:16px}
+  .hero{padding:24px}
+  .hero h1{font-size:2rem}
+}
+.pole{padding:9px 12px;border-radius:8px;border:1px solid var(--linia);background:var(--panel);color:var(--tekst)}
+.pole:focus{outline:2px solid var(--akcent)}
+
+/* Drużyny (CS2) */
+.formularz.szeroki{max-width:520px}
+fieldset{border:1px solid var(--linia);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px;margin:0}
+legend{padding:0 8px;color:var(--akcent);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+.przyciski-rzad{display:flex;gap:12px;align-items:center}
+.sklad-siatka{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.sklad-grupa{background:var(--panel);border:1px solid var(--linia);border-radius:12px;padding:14px}
+.sklad-grupa h3{margin:0 0 10px;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--akcent)}
+.sklad-gracz{padding:8px 10px;margin-bottom:6px;background:var(--panel2);border-radius:8px;font-weight:600}
+
+/* Kreator drużyny: karty zawodników w kształcie tarczy */
+.kreator{display:flex;flex-direction:column;gap:20px}
+.kreator-nazwa{display:flex;flex-direction:column;gap:6px;font-size:.8rem;color:var(--przyg);max-width:520px}
+.kreator-nazwa input{font-size:1.5rem;font-weight:800;text-transform:uppercase;padding:12px 16px;border-radius:10px;
+  border:1px solid var(--linia);background:var(--panel);color:var(--tekst)}
+.kreator-nazwa input:focus{outline:2px solid var(--akcent)}
+.rzad-kart{display:flex;flex-wrap:wrap;gap:16px}
+.rzad-sekcji{display:flex;flex-wrap:wrap;gap:36px}
+
+.gcard{--tarcza:polygon(9% 0,91% 0,100% 7%,100% 78%,50% 100%,0 78%,0 7%);
+  position:relative;width:176px;height:284px;padding:3px;cursor:pointer;
+  background:linear-gradient(160deg,#ffd75e,#a9780b 55%,#ffd75e);
+  clip-path:var(--tarcza);transition:transform .15s,filter .15s}
+.gcard:hover,.gcard:focus-visible{transform:translateY(-5px);filter:brightness(1.12);outline:none}
+.gcard-in{position:relative;width:100%;height:100%;clip-path:var(--tarcza);
+  display:flex;flex-direction:column;align-items:center;padding:16px 8px 0;
+  background:
+    radial-gradient(circle at 20% 18%,rgba(255,215,94,.28),transparent 40%),
+    linear-gradient(118deg,#0c0d12 0 44%,#e9bf2e 44% 60%,#efefef 60%)}
+.gcard-rola{font-size:.68rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#fff;
+  text-shadow:0 1px 4px #000}
+.gcard-avatar{margin-top:18px;width:86px;height:86px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:2.4rem;font-weight:800;color:#e9bf2e;background:#14151c;
+  border:3px solid #e9bf2e;box-shadow:0 0 18px rgba(0,0,0,.6)}
+.gcard-nick{margin-top:22px;width:calc(100% + 16px);padding:8px 6px;text-align:center;font-size:1.05rem;font-weight:800;
+  color:#fff;background:rgba(18,18,22,.85);min-height:38px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gcard-x{position:absolute;top:14px;right:22px;width:24px;height:24px;padding:0;border-radius:50%;
+  background:rgba(0,0,0,.65);color:#fff;font-size:1rem;line-height:1}
+.gcard-x:hover{background:var(--blad)}
+.gcard.pusta{background:linear-gradient(160deg,#6a6e7c,#40434e)}
+.gcard.pusta .gcard-in{background:#2a2d37}
+.gcard.pusta .gcard-avatar{background:#3a3d49;border-color:#5b5f6e;color:#8c91a2;font-size:3rem;font-weight:300}
+.gcard.pusta .gcard-nick,.gcard.pusta .gcard-x{display:none}
+.gcard.brak{background:linear-gradient(160deg,#ff6b6b,#a11)}
+.gcard.mala{width:140px;height:226px}
+.gcard.mala .gcard-avatar{width:64px;height:64px;font-size:1.8rem;margin-top:12px}
+.gcard.mala .gcard-nick{font-size:.9rem;margin-top:16px}
+.gcard.mala .gcard-x{right:16px}
+
+/* Okno wyszukiwania zawodnika */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:50}
+.modal.otwarty{display:flex}
+.modal-okno{background:var(--panel);border:1px solid var(--akcent);border-radius:14px;width:min(440px,92vw);padding:20px}
+.modal-gora{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.modal-gora h3{margin:0;font-size:1rem}
+.modal-zamknij{padding:2px 10px;background:var(--panel2);color:var(--tekst);font-size:1.3rem}
+.modal-okno input{width:100%;padding:11px 14px;border-radius:8px;border:1px solid var(--linia);background:var(--bg);
+  color:var(--tekst);font-size:1rem}
+.modal-okno input:focus{outline:2px solid var(--akcent)}
+.modal-wyniki{list-style:none;margin:12px 0 0;padding:0;max-height:320px;overflow-y:auto}
+.modal-wyniki li{padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+.modal-wyniki li:hover{background:var(--panel2)}
+.modal-wyniki li.brak-wynikow{color:var(--przyg);cursor:default;font-weight:400}
+.modal-wyniki li.brak-wynikow:hover{background:none}
