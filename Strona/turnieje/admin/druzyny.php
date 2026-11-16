@@ -3,35 +3,57 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/druzyna_funkcje.php';
 wymagajRoli('administrator');
 
+$pdo = db();
 $ok = '';
 $blad = '';
+$nazwaNowa = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrfSprawdz();
-    $id = (int)($_POST['id'] ?? 0);
-    if (($_POST['akcja'] ?? '') === 'usun' && $id) {
-        $st = db()->prepare("SELECT 1 FROM mecz WHERE (id_druzyny_a = ? OR id_druzyny_b = ?) AND status = 'rozegrany' LIMIT 1");
-        $st->execute([$id, $id]);
-        if ($st->fetchColumn()) {
-            $blad = 'Nie można usunąć drużyny z rozegranymi meczami.';
-        } elseif (druzynaZablokowana($id)) {
-            $blad = 'Nie można usunąć drużyny uczestniczącej w trwającym turnieju.';
+    $akcja = $_POST['akcja'] ?? '';
+
+    if ($akcja === 'usun') {
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id) {
+            $blad = usunDruzyne($id);
+            if ($blad === '') $ok = 'Drużyna została usunięta.';
+        }
+
+    } elseif ($akcja === 'dodaj') {
+        $nazwaNowa = trim($_POST['nazwa'] ?? '');
+        $idK = (int)($_POST['id_kapitana'] ?? 0);
+        $st = $pdo->prepare('SELECT * FROM zawodnik WHERE id_zawodnika = ?');
+        $st->execute([$idK]);
+        $w = $st->fetch();
+
+        if (mb_strlen($nazwaNowa) < 3 || mb_strlen($nazwaNowa) > 30) {
+            $blad = 'Nazwa drużyny musi mieć od 3 do 30 znaków.';
+        } elseif (!$w) {
+            $blad = 'Wybierz kapitana drużyny.';
+        } elseif (druzynaZawodnika($idK)) {
+            $blad = 'Ten zawodnik należy już do drużyny.';
         } else {
-            $pdo = db();
+            // Zawodnik bez konta (dane testowe): właścicielem zostaje administrator
+            $wlasciciel = $w['id_uzytkownika'] !== null ? (int)$w['id_uzytkownika'] : uzytkownik()['id'];
             try {
                 $pdo->beginTransaction();
-                $pdo->prepare('DELETE FROM zgloszenie WHERE id_druzyny = ?')->execute([$id]);
-                $pdo->prepare('DELETE FROM druzyna WHERE id_druzyny = ?')->execute([$id]);
+                $pdo->prepare('INSERT INTO druzyna (nazwa, id_wlasciciela) VALUES (?, ?)')->execute([$nazwaNowa, $wlasciciel]);
+                $nowe = (int)$pdo->lastInsertId();
+                $pdo->prepare("INSERT INTO sklad (id_druzyny, id_zawodnika, rola) VALUES (?, ?, 'kapitan')")->execute([$nowe, $idK]);
+                $pdo->prepare('INSERT INTO ranking (id_druzyny) VALUES (?)')->execute([$nowe]);
                 $pdo->commit();
-                $ok = 'Drużyna została usunięta.';
+                $ok = 'Drużyna „' . $nazwaNowa . '” została utworzona. Resztę składu dodasz przez zaproszenia.';
+                $nazwaNowa = '';
             } catch (PDOException $ex) {
                 if ($pdo->inTransaction()) $pdo->rollBack();
-                $blad = 'Nie udało się usunąć drużyny.';
+                if ($ex->getCode() === '23000') $blad = 'Drużyna o takiej nazwie już istnieje (lub zawodnik jest już w innej drużynie).';
+                else throw $ex;
             }
         }
     }
 }
 
-$druzyny = db()->query(
+$druzyny = $pdo->query(
     "SELECT d.id_druzyny, d.nazwa, u.nick AS wlasciciel,
             (SELECT z.nick FROM sklad s JOIN zawodnik z ON z.id_zawodnika = s.id_zawodnika
               WHERE s.id_druzyny = d.id_druzyny AND s.rola = 'kapitan' LIMIT 1) AS kapitan,
@@ -41,6 +63,12 @@ $druzyny = db()->query(
      ORDER BY d.nazwa"
 )->fetchAll();
 
+$wolni = $pdo->query(
+    'SELECT w.id_zawodnika, w.nick, w.id_uzytkownika FROM zawodnik w
+     WHERE NOT EXISTS (SELECT 1 FROM sklad s WHERE s.id_zawodnika = w.id_zawodnika)
+     ORDER BY w.nick'
+)->fetchAll();
+
 $tytul = 'Zarządzaj drużynami';
 require __DIR__ . '/../includes/header.php';
 ?>
@@ -48,6 +76,28 @@ require __DIR__ . '/../includes/header.php';
 <?php if ($ok): ?><p class="ok"><?= e($ok) ?></p><?php endif; ?>
 <?php if ($blad): ?><p class="blad"><?= e($blad) ?></p><?php endif; ?>
 
+<h2>Dodaj drużynę</h2>
+<?php if (!$wolni): ?>
+  <p class="przygaszony">Brak zawodników bez drużyny, którzy mogliby zostać kapitanem.</p>
+<?php else: ?>
+<form method="post" class="formularz szeroki">
+  <?= csrfPole() ?>
+  <label>Nazwa drużyny
+    <input type="text" name="nazwa" value="<?= e($nazwaNowa) ?>" minlength="3" maxlength="30" required>
+  </label>
+  <label>Kapitan
+    <select name="id_kapitana" required>
+      <?php foreach ($wolni as $w): ?>
+        <option value="<?= (int)$w['id_zawodnika'] ?>"><?= e($w['nick']) ?><?= $w['id_uzytkownika'] === null ? ' (bez konta)' : '' ?></option>
+      <?php endforeach; ?>
+    </select>
+  </label>
+  <div class="przyciski-rzad"><button name="akcja" value="dodaj">Utwórz drużynę</button></div>
+  <small class="przygaszony">Rezerwowi i trener nie są wymagani. Do rozgrywek potrzebna jest pełna piątka (kapitan + 4 graczy).</small>
+</form>
+<?php endif; ?>
+
+<h2>Wszystkie drużyny</h2>
 <?php if (!$druzyny): ?>
   <p class="przygaszony">Brak zarejestrowanych drużyn.</p>
 <?php else: ?>
@@ -61,7 +111,7 @@ require __DIR__ . '/../includes/header.php';
       <td><?= (int)$d['liczba'] ?> os.</td>
       <td><?= (int)$d['turnieje'] ?></td>
       <td class="akcje">
-        <a href="../druzyna_form.php?id=<?= (int)$d['id_druzyny'] ?>">Edytuj skład</a>
+        <a href="../druzyna_form.php?id=<?= (int)$d['id_druzyny'] ?>">Zarządzaj</a>
         <form method="post" class="inline">
           <?= csrfPole() ?>
           <input type="hidden" name="id" value="<?= (int)$d['id_druzyny'] ?>">

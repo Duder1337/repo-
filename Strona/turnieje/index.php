@@ -20,7 +20,7 @@ require 'includes/header.php';
 ?>
 <section class="hero">
   <div class="hero-tekst">
-    <span class="hero-nad">COUNTER-STRIKE 2 · SEZON <?= date('Y') ?></span>
+    <span class="hero-nad">NEXORA · COUNTER-STRIKE 2 · SEZON <?= date('Y') ?></span>
     <h1>Walcz o puchar.<br>Zbuduj drużynę.</h1>
     <p>Załóż konto, zbuduj skład 5 vs 5 z rezerwowymi i trenerem, zgłoś się do turnieju CS2 i śledź drabinkę oraz ranking.</p>
     <div class="hero-przyciski">

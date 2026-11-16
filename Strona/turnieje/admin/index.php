@@ -30,5 +30,17 @@ require __DIR__ . '/../includes/header.php';
     <div class="karta-tresc"><h3>👥 Zarządzaj drużynami</h3>
       <small>Przegląd drużyn i usuwanie drużyn</small></div>
   </a>
+  <a class="karta" href="zaproszenia.php">
+    <div class="karta-tresc"><h3>✉️ Zarządzaj zaproszeniami</h3>
+      <small>Wysyłanie, akceptowanie i anulowanie zaproszeń do drużyn (faza testowa)</small></div>
+  </a>
+  <a class="karta" href="ogloszenia.php">
+    <div class="karta-tresc"><h3>📢 Zarządzaj ogłoszeniami</h3>
+      <small>Publikowanie, edycja i usuwanie ogłoszeń</small></div>
+  </a>
+  <a class="karta" href="liga.php">
+    <div class="karta-tresc"><h3>🥇 NEXORA PRO LEAGUE</h3>
+      <small>Zgłoszenia, start ligi i wpisywanie wyników</small></div>
+  </a>
 </div>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

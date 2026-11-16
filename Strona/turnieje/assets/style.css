@@ -1,161 +1,220 @@
+/* ==========================================================================
+   Nexora – ciemny motyw, w którym każda sekcja ma własny kolor:
+   turnieje żółty · drużyny turkusowy · ranking fioletowy · liga różowy
+   ogłoszenia pomarańczowy · zawodnicy limonkowy · administracja stalowy
+   Kolor sekcji (--sek) ustawia klasa na <body> (patrz includes/header.php).
+   ========================================================================== */
 :root{
-  --bg:#0b0d14; --panel:#131722; --panel2:#1a2030; --linia:#242b3f;
-  --tekst:#e9ecf5; --przyg:#8b93a7; --akcent:#ffb020; --akcent-t:#1a1200;
-  --blad:#ff6b6b; --ok:#4cd98a;
+  --bg:#0a0c14; --panel:#121726; --panel2:#1a2136; --linia:#262e47;
+  --tekst:#eef1f8; --przyg:#9ba4bc; --akcent-t:#0b0d14;
+  --blad:#ff7b7b; --ok:#4ade80;
+  --c-turnieje:#facc15; --c-druzyny:#22d3ee; --c-ranking:#c084fc; --c-liga:#f472b6;
+  --c-ogl:#fb7c3c; --c-zaw:#a3e635; --c-admin:#94a3b8; --c-konto:#818cf8;
+  --sek:var(--c-turnieje);
+  --font:"Figtree","Segoe UI",system-ui,Roboto,Arial,sans-serif;
+  --font-nag:"Exo 2","Segoe UI",system-ui,sans-serif;
 }
+body{--akcent:var(--sek)}
+body.s-start,body.s-turnieje{--sek:var(--c-turnieje)}
+body.s-druzyny{--sek:var(--c-druzyny)}
+body.s-ranking{--sek:var(--c-ranking)}
+body.s-liga{--sek:var(--c-liga)}
+body.s-ogloszenia{--sek:var(--c-ogl)}
+body.s-zawodnicy{--sek:var(--c-zaw)}
+body.s-admin{--sek:var(--c-admin)}
+body.s-konto{--sek:var(--c-konto)}
+
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--tekst);line-height:1.5}
-a{color:var(--akcent);text-decoration:none}
-a:hover{text-decoration:underline}
-h1{font-size:1.9rem;margin:.2em 0 .6em}
-h2{font-size:1.1rem;letter-spacing:.04em;text-transform:uppercase;color:var(--przyg);margin:1.6em 0 .8em}
+body{margin:0;font-family:var(--font);font-size:16px;line-height:1.6;color:var(--tekst);
+  background:
+    radial-gradient(900px 520px at 100% -10%,color-mix(in srgb,var(--sek) 15%,transparent),transparent 60%),
+    radial-gradient(700px 500px at -10% 110%,rgba(124,92,255,.12),transparent 60%),
+    var(--bg);
+  background-attachment:fixed}
+a{color:color-mix(in srgb,var(--sek) 72%,#fff);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--sek);outline-offset:2px}
+
+h1,h2,h3{font-family:var(--font-nag);letter-spacing:-.01em;line-height:1.2}
+h1{font-size:2.1rem;font-weight:800;margin:.2em 0 .7em}
+.kontener > h1{padding-left:16px;border-left:6px solid var(--sek);border-radius:2px}
+h2{font-size:1.3rem;font-weight:700;color:var(--tekst);margin:1.8em 0 .8em;display:flex;align-items:center;gap:10px}
+h2::before{content:"";width:12px;height:12px;border-radius:4px;background:var(--sek);flex-shrink:0}
+.kontener > h2:nth-of-type(4n+2)::before{background:var(--c-druzyny)}
+.kontener > h2:nth-of-type(4n+3)::before{background:var(--c-liga)}
+.kontener > h2:nth-of-type(4n+4)::before{background:var(--c-ranking)}
 .przygaszony{color:var(--przyg)}
 
-/* Układ: menu boczne + treść */
+/* ---------- Układ: menu boczne + treść ---------- */
 .uklad{display:flex;min-height:100vh}
-.boczne{width:240px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--linia);
-  padding:18px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
-.logo{display:flex;align-items:center;gap:10px;font-size:1.6rem;color:var(--tekst);padding:4px 10px 18px}
+.boczne{width:250px;flex-shrink:0;background:color-mix(in srgb,var(--panel) 92%,transparent);
+  border-right:1px solid var(--linia);padding:18px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{display:flex;align-items:center;gap:10px;font-size:1.7rem;color:var(--tekst);padding:4px 10px 18px}
 .logo:hover{text-decoration:none}
-.logo span{display:flex;flex-direction:column;font-weight:800;font-size:1.05rem;line-height:1.1;letter-spacing:.06em}
-.logo small{color:var(--akcent);font-size:.7rem;letter-spacing:.25em}
-.sekcja{margin:18px 10px 6px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--przyg)}
-.poz{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--tekst);font-weight:500}
-.poz:hover{background:var(--panel2);text-decoration:none}
-.poz.aktywne{background:var(--panel2);box-shadow:inset 3px 0 0 var(--akcent)}
+.logo span{display:flex;flex-direction:column;font-family:var(--font-nag);font-weight:800;font-size:1.35rem;line-height:1.05;
+  letter-spacing:.04em;background:linear-gradient(90deg,var(--c-turnieje),var(--c-liga),var(--c-ranking),var(--c-druzyny));
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.logo small{font-size:.75rem;font-weight:700;letter-spacing:.2em;color:var(--c-druzyny);-webkit-text-fill-color:var(--c-druzyny)}
+.sekcja{margin:20px 10px 6px;font-size:.78rem;font-weight:700;color:var(--przyg)}
+.poz{--c:var(--przyg);display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:2px;border-radius:10px;font-weight:600}
+.poz span{color:color-mix(in srgb,var(--c) 75%,#fff)}
+.poz[href$="/turnieje.php"]{--c:var(--c-turnieje)}
+.poz[href$="/druzyny.php"]{--c:var(--c-druzyny)}
+.poz[href$="/ranking.php"]{--c:var(--c-ranking)}
+.poz[href$="/liga.php"]{--c:var(--c-liga)}
+.poz[href$="/ogloszenia.php"]{--c:var(--c-ogl)}
+.poz[href$="/zawodnicy.php"]{--c:var(--c-zaw)}
+.poz[href$="/admin/index.php"]{--c:var(--c-admin)}
+.poz:hover{background:color-mix(in srgb,var(--c) 13%,transparent);text-decoration:none}
+.poz.aktywne{background:color-mix(in srgb,var(--c) 20%,transparent);box-shadow:inset 4px 0 0 var(--c)}
+.poz.aktywne span{color:#fff}
 .glowna{flex:1;min-width:0;display:flex;flex-direction:column}
 .gora{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 28px;
-  border-bottom:1px solid var(--linia);background:var(--bg);position:sticky;top:0;z-index:5}
-.sciezka{font-size:.75rem;letter-spacing:.1em;color:var(--przyg)}
-.konto{display:flex;align-items:center;gap:16px;font-size:.85rem;font-weight:600}
-.nick{color:var(--przyg)}
-.kontener{width:100%;max-width:1200px;margin:0 auto;padding:24px 28px;flex:1}
+  border-bottom:2px solid color-mix(in srgb,var(--sek) 45%,var(--linia));
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);position:sticky;top:0;z-index:5}
+.sciezka{font-size:.82rem;font-weight:600;color:var(--przyg)}
+.konto{display:flex;align-items:center;gap:16px;font-size:.9rem;font-weight:600}
+.nick{color:var(--tekst)}
+.kontener{width:100%;max-width:1200px;margin:0 auto;padding:26px 28px;flex:1}
 .stopka{text-align:center;padding:24px;color:var(--przyg);font-size:.85rem}
 
-/* Przyciski */
-button,.przycisk{display:inline-block;padding:10px 18px;border:0;border-radius:8px;background:var(--akcent);
-  color:var(--akcent-t);font-weight:700;cursor:pointer;font-size:.95rem}
-button:hover,.przycisk:hover{filter:brightness(1.08);text-decoration:none}
+/* ---------- Przyciski (kolor zależy od tego, co robią) ---------- */
+button,.przycisk{display:inline-block;padding:10px 18px;border:0;border-radius:10px;background:var(--sek);
+  color:var(--akcent-t);font:inherit;font-weight:700;font-size:.95rem;cursor:pointer;
+  transition:filter .15s,transform .15s}
+button:not(:disabled):hover,.przycisk:hover{filter:brightness(1.1);transform:translateY(-1px);text-decoration:none}
 .przycisk.maly{padding:7px 14px;font-size:.85rem}
 .przycisk.drugi,button.drugi{background:var(--panel2);color:var(--tekst);border:1px solid var(--linia)}
+button[value="usun"],button[value="usun_czlonka"],button[value="usun_zgloszenie"],button[value="rozwiaz"],
+button[value="anuluj"],button[value="anuluj_zaproszenie"],button[value="odrzuc"],button[value="wycofaj"],button[value="opusc"]{
+  background:color-mix(in srgb,var(--blad) 13%,var(--panel2));color:var(--blad);
+  border:1px solid color-mix(in srgb,var(--blad) 45%,transparent)}
+button[value="akceptuj"],button[value="opublikuj"],button[value="start"]{background:var(--ok);color:#04210f;border:0}
+button[value="przekaz_kapitana"]{background:var(--c-turnieje);color:var(--akcent-t);border:0}
+button:disabled{opacity:.45;cursor:not-allowed}
 
-/* Hero */
+/* ---------- Hero ---------- */
 .hero{display:flex;flex-wrap:wrap;gap:28px;justify-content:space-between;align-items:center;
-  padding:40px;border-radius:16px;border:1px solid var(--linia);
-  background:radial-gradient(600px 300px at 85% 0%,rgba(255,176,32,.18),transparent 60%),
-             radial-gradient(500px 300px at 0% 100%,rgba(124,92,255,.22),transparent 60%),var(--panel)}
-.hero-nad{color:var(--akcent);letter-spacing:.3em;font-size:.75rem;font-weight:700}
-.hero h1{font-size:2.6rem;line-height:1.1;margin:.3em 0}
-.hero p{color:var(--przyg);max-width:460px}
-.hero-przyciski{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
-.hero-statystyki{display:grid;grid-template-columns:repeat(2,minmax(130px,1fr));gap:12px}
+  padding:44px;border-radius:20px;border:1px solid var(--linia);
+  background:
+    radial-gradient(520px 300px at 88% 0%,rgba(250,204,21,.20),transparent 60%),
+    radial-gradient(520px 320px at 0% 100%,rgba(192,132,252,.24),transparent 60%),
+    radial-gradient(420px 260px at 55% 120%,rgba(34,211,238,.16),transparent 60%),
+    var(--panel)}
+.hero-nad{color:var(--c-druzyny);font-size:.9rem;font-weight:700}
+.hero h1{font-size:2.9rem;font-weight:800;line-height:1.08;margin:.25em 0 .35em}
+.hero p{color:var(--przyg);max-width:470px;font-size:1.05rem}
+.hero-przyciski{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.hero-statystyki{display:grid;grid-template-columns:repeat(2,minmax(140px,1fr));gap:12px}
 
-/* Kafelki statystyk */
-.stat{background:var(--bg);border:1px solid var(--akcent);border-radius:10px;padding:12px 16px;text-align:center;
-  box-shadow:0 0 0 1px rgba(255,176,32,.1) inset}
-.stat small{display:block;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przyg)}
-.stat b{font-size:1.5rem;color:var(--akcent)}
-.info-kafle{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+/* ---------- Kafelki statystyk (każdy w innym kolorze) ---------- */
+.stat{--s:var(--sek);background:var(--panel);border:1px solid var(--linia);border-top:4px solid var(--s);
+  border-radius:12px;padding:12px 16px;text-align:center}
+.stat small{display:block;font-size:.8rem;font-weight:600;color:var(--przyg)}
+.stat b{font-family:var(--font-nag);font-size:1.7rem;font-weight:800;color:var(--s)}
+.stat:nth-child(5n+1){--s:var(--c-turnieje)}
+.stat:nth-child(5n+2){--s:var(--c-druzyny)}
+.stat:nth-child(5n+3){--s:var(--c-liga)}
+.stat:nth-child(5n+4){--s:var(--c-ranking)}
+.stat:nth-child(5n+5){--s:var(--c-zaw)}
+.info-kafle{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0}
 
-/* Karty turniejów */
+/* ---------- Karty turniejów ---------- */
 .naglowek-sekcji{display:flex;justify-content:space-between;align-items:baseline}
-.siatka-kart{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
-.karta{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--linia);border-radius:14px;
+.siatka-kart{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.karta{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--linia);border-radius:16px;
   padding:10px;color:var(--tekst);transition:transform .15s,border-color .15s}
-.karta:hover{transform:translateY(-3px);border-color:var(--akcent);text-decoration:none}
-.karta-img{position:relative;height:150px;border-radius:10px;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,hsl(var(--h) 60% 30%),hsl(calc(var(--h) + 50) 70% 12%));overflow:hidden}
-.karta-gra{font-size:1.6rem;font-weight:800;text-align:center;padding:0 10px;text-transform:uppercase;
-  letter-spacing:.05em;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+.karta:hover{transform:translateY(-3px);border-color:var(--sek);text-decoration:none}
+.karta-img{position:relative;height:150px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,hsl(var(--h) 65% 38%),hsl(calc(var(--h) + 50) 70% 14%));overflow:hidden}
+.karta-gra{font-family:var(--font-nag);font-size:1.7rem;font-weight:800;text-align:center;padding:0 10px;
+  text-shadow:0 2px 12px rgba(0,0,0,.5)}
 .karta-tresc{padding:12px 6px 4px;flex:1}
-.karta-tresc small{color:var(--przyg);text-transform:uppercase;font-size:.7rem;letter-spacing:.06em}
-.karta-tresc h3{margin:.2em 0 .6em;font-size:1.05rem;text-transform:uppercase}
+.karta-tresc small{color:var(--przyg);font-size:.82rem;font-weight:600}
+.karta-tresc h3{margin:.2em 0 .6em;font-size:1.15rem;font-weight:700}
 .tagi{display:flex;flex-wrap:wrap;gap:6px}
-.tagi span{background:var(--panel2);border-radius:5px;padding:3px 9px;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+.tagi span{background:var(--panel2);border-radius:6px;padding:3px 10px;font-size:.78rem;font-weight:600;
+  color:var(--t,var(--tekst));border:1px solid color-mix(in srgb,var(--t,var(--linia)) 40%,transparent)}
+.tagi span:nth-child(1){--t:var(--c-druzyny)}
+.tagi span:nth-child(2){--t:var(--c-turnieje)}
+.tagi span:nth-child(3){--t:var(--c-ranking)}
 .karta-stopka{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--linia);
-  margin-top:12px;padding:10px 6px 2px;font-size:.7rem;color:var(--przyg);letter-spacing:.08em}
-.karta-stopka b{font-size:1.1rem;color:var(--tekst)}
+  margin-top:12px;padding:10px 6px 2px;font-size:.78rem;font-weight:600;color:var(--przyg)}
+.karta-stopka b{font-family:var(--font-nag);font-size:1.2rem;color:var(--c-zaw)}
 
-/* Plakietki statusu */
-.plakietka{position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:5px;font-size:.7rem;font-weight:700;
-  text-transform:uppercase;letter-spacing:.05em;background:#000;color:#fff}
+/* ---------- Plakietki statusu ---------- */
+.plakietka{position:absolute;top:10px;right:10px;padding:3px 11px;border-radius:999px;font-size:.78rem;font-weight:700;
+  background:#000;color:#fff}
 .plakietka.st-otwarty{background:var(--ok);color:#04210f}
-.plakietka.st-trakcie{background:var(--akcent);color:var(--akcent-t)}
-.plakietka.st-koniec{background:#444b66;color:#fff}
+.plakietka.st-trakcie{background:var(--c-ogl);color:#2a0f02}
+.plakietka.st-koniec{background:#64748b;color:#fff}
 .plakietka.st-anulowany{background:var(--blad);color:#2a0505}
 .plakietka.st-szkic{background:#000;color:#fff;border:1px dashed var(--przyg)}
 
-/* Strona turnieju */
-.baner-turnieju{position:relative;padding:60px 28px 28px;border-radius:16px;border:1px solid var(--linia);
-  background:linear-gradient(135deg,hsl(var(--h) 55% 24%),hsl(calc(var(--h) + 50) 65% 10%))}
-.baner-turnieju small{text-transform:uppercase;letter-spacing:.2em;color:#ffffffb0}
-.baner-turnieju h1{margin:.1em 0;font-size:2.2rem;text-transform:uppercase}
+/* ---------- Banery (turniej, drużyna, liga, profil) ---------- */
+.baner-turnieju{position:relative;padding:60px 28px 28px;border-radius:20px;border:1px solid var(--linia);
+  background:linear-gradient(135deg,hsl(var(--h) 60% 30%),hsl(calc(var(--h) + 50) 65% 11%))}
+.baner-turnieju small{font-size:.9rem;font-weight:600;color:#ffffffc0}
+.baner-turnieju h1{margin:.1em 0;font-size:2.4rem;font-weight:800}
 .zwyciezca{margin:.4em 0 0;font-size:1.1rem}
 
-/* Filtry i stronicowanie */
+/* ---------- Filtry i stronicowanie ---------- */
 .filtry{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:20px}
-.filtry label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--przyg)}
-select,input{font:inherit}
-select{padding:9px 12px;border-radius:8px;border:1px solid var(--linia);background:var(--panel);color:var(--tekst)}
-.strony{display:flex;gap:10px;justify-content:center;margin-top:24px}
-.strony a,.strony strong{padding:6px 12px;border-radius:6px;background:var(--panel)}
-.strony strong{background:var(--akcent);color:var(--akcent-t)}
+.filtry label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:600;color:var(--przyg)}
+select,input,textarea{font:inherit}
+select{padding:9px 12px;border-radius:10px;border:1px solid var(--linia);background:var(--panel);color:var(--tekst)}
+.strony{display:flex;gap:8px;justify-content:center;margin-top:24px}
+.strony a,.strony strong{padding:6px 13px;border-radius:8px;background:var(--panel);border:1px solid var(--linia)}
+.strony strong{background:var(--sek);color:var(--akcent-t);border-color:var(--sek)}
 
-/* Formularze */
-.formularz{display:flex;flex-direction:column;gap:14px;max-width:400px;background:var(--panel);
-  border:1px solid var(--linia);border-radius:14px;padding:24px}
-.formularz label{display:flex;flex-direction:column;gap:5px;font-size:.85rem;color:var(--przyg)}
-.formularz input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--linia);
+/* ---------- Formularze ---------- */
+.formularz{display:flex;flex-direction:column;gap:14px;max-width:420px;background:var(--panel);
+  border:1px solid var(--linia);border-top:4px solid var(--sek);border-radius:16px;padding:24px}
+.formularz label{display:flex;flex-direction:column;gap:5px;font-size:.9rem;font-weight:600;color:var(--przyg)}
+.formularz input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--linia);
   background:var(--bg);color:var(--tekst)}
-.formularz input:focus,select:focus{outline:2px solid var(--akcent);outline-offset:0}
-.blad{color:var(--blad)} .ok{color:var(--ok)}
+.formularz input:focus,select:focus{outline:2px solid var(--sek);outline-offset:0}
+p.ok,p.blad{margin:12px 0;padding:10px 16px;border-radius:10px;border:1px solid;border-left-width:5px;font-weight:500}
+p.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--panel));border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
+p.blad{color:var(--blad);background:color-mix(in srgb,var(--blad) 10%,var(--panel));border-color:color-mix(in srgb,var(--blad) 50%,transparent)}
 
-/* Tabele */
-.tabela-wrap{overflow-x:auto;border:1px solid var(--linia);border-radius:12px}
+/* ---------- Tabele ---------- */
+.tabela-wrap{overflow-x:auto;border:1px solid var(--linia);border-radius:14px}
 table{width:100%;border-collapse:collapse;background:var(--panel)}
-th{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--przyg);background:var(--panel2)}
+th{font-size:.85rem;font-weight:700;color:color-mix(in srgb,var(--sek) 70%,#fff);background:color-mix(in srgb,var(--sek) 12%,var(--panel2))}
 th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--linia)}
 tr:last-child td{border-bottom:0}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+tr:hover td{background:color-mix(in srgb,var(--sek) 8%,transparent)}
 form.inline{display:inline}
 .akcje{white-space:nowrap}
-.akcje button{padding:5px 12px;font-size:.8rem}
+.akcje button{padding:5px 12px;font-size:.82rem}
 
-/* Telefony i wąskie ekrany */
-@media (max-width:860px){
-  .uklad{display:block}
-  .boczne{width:auto;height:auto;position:static;display:flex;align-items:center;gap:8px;padding:10px;overflow-x:auto}
-  .boczne nav{display:flex;gap:4px}
-  .logo{padding:0 8px;white-space:nowrap}
-  .sekcja{display:none}
-  .poz{white-space:nowrap;padding:8px 12px}
-  .gora{position:static;padding:12px 16px}
-  .kontener{padding:16px}
-  .hero{padding:24px}
-  .hero h1{font-size:2rem}
-}
-.pole{padding:9px 12px;border-radius:8px;border:1px solid var(--linia);background:var(--panel);color:var(--tekst)}
-.pole:focus{outline:2px solid var(--akcent)}
-
-/* Drużyny (CS2) */
-.formularz.szeroki{max-width:520px}
-fieldset{border:1px solid var(--linia);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px;margin:0}
-legend{padding:0 8px;color:var(--akcent);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+/* ---------- Drużyny ---------- */
+.formularz.szeroki{max-width:540px}
+fieldset{border:1px solid var(--linia);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px;margin:0}
+legend{padding:0 8px;color:var(--sek);font-size:.9rem;font-weight:700}
 .przyciski-rzad{display:flex;gap:12px;align-items:center}
-.sklad-siatka{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
-.sklad-grupa{background:var(--panel);border:1px solid var(--linia);border-radius:12px;padding:14px}
-.sklad-grupa h3{margin:0 0 10px;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--akcent)}
-.sklad-gracz{padding:8px 10px;margin-bottom:6px;background:var(--panel2);border-radius:8px;font-weight:600}
+.sklad-siatka{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.sklad-grupa{--r:var(--c-turnieje);background:var(--panel);border:1px solid var(--linia);border-top:4px solid var(--r);
+  border-radius:14px;padding:14px}
+.sklad-grupa:nth-child(1){--r:var(--c-turnieje)}
+.sklad-grupa:nth-child(2){--r:var(--c-druzyny)}
+.sklad-grupa:nth-child(3){--r:var(--c-ranking)}
+.sklad-grupa:nth-child(4){--r:var(--c-zaw)}
+.sklad-grupa h3{margin:0 0 10px;font-size:1.05rem;font-weight:700;color:var(--r)}
+.sklad-gracz{padding:8px 12px;margin-bottom:6px;background:var(--panel2);border-radius:10px;font-weight:600;
+  border-left:3px solid var(--r)}
 
-/* Kreator drużyny: karty zawodników w kształcie tarczy */
+/* Kreator drużyny (karty zawodników w kształcie tarczy) */
 .kreator{display:flex;flex-direction:column;gap:20px}
-.kreator-nazwa{display:flex;flex-direction:column;gap:6px;font-size:.8rem;color:var(--przyg);max-width:520px}
-.kreator-nazwa input{font-size:1.5rem;font-weight:800;text-transform:uppercase;padding:12px 16px;border-radius:10px;
+.kreator-nazwa{display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--przyg);max-width:520px}
+.kreator-nazwa input{font-family:var(--font-nag);font-size:1.5rem;font-weight:800;padding:12px 16px;border-radius:12px;
   border:1px solid var(--linia);background:var(--panel);color:var(--tekst)}
-.kreator-nazwa input:focus{outline:2px solid var(--akcent)}
+.kreator-nazwa input:focus{outline:2px solid var(--sek)}
 .rzad-kart{display:flex;flex-wrap:wrap;gap:16px}
 .rzad-sekcji{display:flex;flex-wrap:wrap;gap:36px}
-
 .gcard{--tarcza:polygon(9% 0,91% 0,100% 7%,100% 78%,50% 100%,0 78%,0 7%);
   position:relative;width:176px;height:284px;padding:3px;cursor:pointer;
   background:linear-gradient(160deg,#ffd75e,#a9780b 55%,#ffd75e);
@@ -163,11 +222,9 @@ legend{padding:0 8px;color:var(--akcent);font-size:.8rem;letter-spacing:.08em;te
 .gcard:hover,.gcard:focus-visible{transform:translateY(-5px);filter:brightness(1.12);outline:none}
 .gcard-in{position:relative;width:100%;height:100%;clip-path:var(--tarcza);
   display:flex;flex-direction:column;align-items:center;padding:16px 8px 0;
-  background:
-    radial-gradient(circle at 20% 18%,rgba(255,215,94,.28),transparent 40%),
+  background:radial-gradient(circle at 20% 18%,rgba(255,215,94,.28),transparent 40%),
     linear-gradient(118deg,#0c0d12 0 44%,#e9bf2e 44% 60%,#efefef 60%)}
-.gcard-rola{font-size:.68rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#fff;
-  text-shadow:0 1px 4px #000}
+.gcard-rola{font-size:.72rem;font-weight:800;letter-spacing:.14em;color:#fff;text-shadow:0 1px 4px #000}
 .gcard-avatar{margin-top:18px;width:86px;height:86px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;font-size:2.4rem;font-weight:800;color:#e9bf2e;background:#14151c;
   border:3px solid #e9bf2e;box-shadow:0 0 18px rgba(0,0,0,.6)}
@@ -189,15 +246,84 @@ legend{padding:0 8px;color:var(--akcent);font-size:.8rem;letter-spacing:.08em;te
 /* Okno wyszukiwania zawodnika */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:50}
 .modal.otwarty{display:flex}
-.modal-okno{background:var(--panel);border:1px solid var(--akcent);border-radius:14px;width:min(440px,92vw);padding:20px}
+.modal-okno{background:var(--panel);border:1px solid var(--sek);border-radius:16px;width:min(440px,92vw);padding:20px}
 .modal-gora{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.modal-gora h3{margin:0;font-size:1rem}
+.modal-gora h3{margin:0;font-size:1.05rem}
 .modal-zamknij{padding:2px 10px;background:var(--panel2);color:var(--tekst);font-size:1.3rem}
-.modal-okno input{width:100%;padding:11px 14px;border-radius:8px;border:1px solid var(--linia);background:var(--bg);
+.modal-okno input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--linia);background:var(--bg);
   color:var(--tekst);font-size:1rem}
-.modal-okno input:focus{outline:2px solid var(--akcent)}
+.modal-okno input:focus{outline:2px solid var(--sek)}
 .modal-wyniki{list-style:none;margin:12px 0 0;padding:0;max-height:320px;overflow-y:auto}
 .modal-wyniki li{padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600}
 .modal-wyniki li:hover{background:var(--panel2)}
 .modal-wyniki li.brak-wynikow{color:var(--przyg);cursor:default;font-weight:400}
 .modal-wyniki li.brak-wynikow:hover{background:none}
+.pole{padding:9px 12px;border-radius:10px;border:1px solid var(--linia);background:var(--panel);color:var(--tekst)}
+.pole:focus{outline:2px solid var(--sek)}
+
+/* ---------- Ogłoszenia (kolejne w innych kolorach) i liga ---------- */
+.ogloszenie{--o:var(--c-ogl);background:var(--panel);border:1px solid var(--linia);border-left:6px solid var(--o);
+  border-radius:14px;padding:18px 22px;margin-bottom:16px}
+.ogloszenie:nth-of-type(4n+2){--o:var(--c-druzyny)}
+.ogloszenie:nth-of-type(4n+3){--o:var(--c-liga)}
+.ogloszenie:nth-of-type(4n+4){--o:var(--c-ranking)}
+.ogloszenie h3{margin:0 0 4px;font-size:1.3rem;font-weight:700;color:var(--o)}
+.ogloszenie-meta{font-size:.85rem;color:var(--przyg);margin-bottom:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ogloszenie-tresc{word-wrap:break-word}
+.powiazanie{background:var(--panel2);border:1px solid var(--o);border-radius:999px;padding:2px 11px;font-size:.78rem;
+  font-weight:600;color:var(--o)}
+.formularz textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--linia);
+  background:var(--bg);color:var(--tekst);min-height:160px;resize:vertical}
+.formularz textarea:focus{outline:2px solid var(--sek)}
+.formularz select{width:100%}
+.tabela-liga td.liczba,.tabela-liga th.liczba{text-align:center}
+.tabela-liga tr.top:nth-child(2) td{background:rgba(250,204,21,.13)}
+.tabela-liga tr.top:nth-child(3) td{background:rgba(203,213,225,.10)}
+.tabela-liga tr.top:nth-child(4) td{background:rgba(251,124,60,.12)}
+body.s-ranking tr:nth-child(2) td{background:rgba(250,204,21,.13)}
+body.s-ranking tr:nth-child(3) td{background:rgba(203,213,225,.10)}
+body.s-ranking tr:nth-child(4) td{background:rgba(251,124,60,.12)}
+.mecz-wynik{text-align:center;font-family:var(--font-nag);font-weight:800;white-space:nowrap}
+.mecz-wygrana{color:var(--ok);font-weight:800}
+.mecz-oczekuje{color:var(--przyg)}
+.wynik-in{width:64px;padding:6px 8px;border-radius:8px;border:1px solid var(--linia);background:var(--bg);color:var(--tekst)}
+.druzyny-ligi{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;padding:0;list-style:none}
+.druzyny-ligi li{background:var(--panel);border:1px solid var(--linia);border-left:4px solid var(--c-liga);
+  border-radius:10px;padding:6px 12px;font-weight:600}
+
+/* ---------- Zaproszenia, profile zawodników ---------- */
+.powiadomienie{background:color-mix(in srgb,var(--c-ogl) 13%,var(--panel));border:1px solid var(--c-ogl);
+  border-left-width:5px;border-radius:10px;padding:10px 16px;margin-bottom:16px}
+.licznik{display:inline-block;min-width:20px;padding:0 6px;border-radius:10px;background:var(--c-liga);color:#2a0516;
+  font-size:.78rem;font-weight:800;text-align:center}
+.awatar{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;
+  background:var(--panel2);border:2px solid var(--sek);color:var(--sek);font-weight:800;object-fit:cover;
+  vertical-align:middle;overflow:hidden;margin-right:6px}
+.awatar.duzy{width:120px;height:120px;font-size:3rem;margin-right:0;background:#14151c}
+.profil-gora{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.profil-gora h1{margin:.1em 0}
+.formularz input[type=file]{padding:8px}
+.podpowiedzi{list-style:none;margin:-8px 0 0;padding:0;max-height:240px;overflow-y:auto;background:var(--bg);
+  border:1px solid var(--linia);border-radius:10px}
+.podpowiedzi:empty{display:none}
+.podpowiedzi li{padding:9px 12px;cursor:pointer;font-weight:600}
+.podpowiedzi li:hover{background:var(--panel2)}
+.podpowiedzi li.brak-wynikow{color:var(--przyg);cursor:default;font-weight:400}
+
+/* ---------- Telefony i wąskie ekrany ---------- */
+@media (max-width:860px){
+  .uklad{display:block}
+  .boczne{width:auto;height:auto;position:static;display:flex;align-items:center;gap:8px;padding:10px;overflow-x:auto}
+  .boczne nav{display:flex;gap:4px}
+  .logo{padding:0 8px;white-space:nowrap}
+  .sekcja{display:none}
+  .poz{white-space:nowrap;padding:8px 12px}
+  .poz.aktywne{box-shadow:inset 0 -3px 0 var(--c)}
+  .gora{position:static;padding:12px 16px}
+  .kontener{padding:16px}
+  .hero{padding:24px}
+  .hero h1{font-size:2.1rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}

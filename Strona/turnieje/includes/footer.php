@@ -1,5 +1,5 @@
     </main>
-    <footer class="stopka">Platforma turniejów e-sportowych &copy; <?= date('Y') ?></footer>
+    <footer class="stopka">Nexora &middot; platforma turniejów e-sportowych &copy; <?= date('Y') ?></footer>
   </div>
 </div>
 </body>

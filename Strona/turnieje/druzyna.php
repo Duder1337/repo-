@@ -8,10 +8,32 @@ $st->execute([$id]);
 $d = $st->fetch();
 if (!$d) { http_response_code(404); exit('Nie znaleziono drużyny.'); }
 
-$grupy = ['kapitan' => [], 'gracz' => [], 'rezerwowy' => [], 'trener' => []];
-foreach (pobierzSklad($id) as $s) $grupy[$s['rola']][] = $s['nick'];
+$komunikat = '';
+$blad = '';
 
-$moja = zalogowany() && ((int)$d['id_wlasciciela'] === uzytkownik()['id'] || maRole('administrator'));
+// Zwykły członek może sam opuścić drużynę (kapitan musi najpierw przekazać funkcję)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['akcja'] ?? '') === 'opusc') {
+    wymagajLogowania();
+    csrfSprawdz();
+    $mojaD = mojaDruzyna();
+    if (!$mojaD || (int)$mojaD['id_druzyny'] !== $id) {
+        $blad = 'Nie należysz do tej drużyny.';
+    } elseif ($mojaD['rola'] === 'kapitan') {
+        $blad = 'Kapitan nie może opuścić drużyny. Przekaż kapitana innemu graczowi lub rozwiąż drużynę.';
+    } elseif (druzynaZablokowana($id)) {
+        $blad = 'Nie można opuścić drużyny uczestniczącej w trwających rozgrywkach.';
+    } else {
+        db()->prepare('DELETE FROM sklad WHERE id_druzyny = ? AND id_zawodnika = ?')->execute([$id, mojZawodnik()['id_zawodnika']]);
+        $komunikat = 'Opuściłeś drużynę.';
+    }
+}
+
+$grupy = ['kapitan' => [], 'gracz' => [], 'rezerwowy' => [], 'trener' => []];
+foreach (pobierzSklad($id) as $s) $grupy[$s['rola']][] = $s;
+
+$moja     = mozeZarzadzac($id);          // kapitan lub administrator
+$mojaD    = mojaDruzyna();
+$jestCzlonkiem = $mojaD && (int)$mojaD['id_druzyny'] === $id && $mojaD['rola'] !== 'kapitan';
 
 $st = db()->prepare('SELECT punkty, wygrane, przegrane FROM ranking WHERE id_druzyny = ?');
 $st->execute([$id]);
@@ -39,17 +61,27 @@ require 'includes/header.php';
   <div class="stat"><small>Przegrane</small><b><?= (int)$r['przegrane'] ?></b></div>
 </div>
 
+<?php if ($komunikat): ?><p class="ok"><?= e($komunikat) ?></p><?php endif; ?>
+<?php if ($blad): ?><p class="blad"><?= e($blad) ?></p><?php endif; ?>
+
 <?php if ($moja): ?>
-  <p><a class="przycisk" href="druzyna_form.php?id=<?= (int)$id ?>">Edytuj skład</a></p>
+  <p><a class="przycisk" href="druzyna_form.php?id=<?= (int)$id ?>">Zarządzaj drużyną</a></p>
+<?php elseif ($jestCzlonkiem): ?>
+  <form method="post" class="inline">
+    <?= csrfPole() ?>
+    <button name="akcja" value="opusc" class="drugi" onclick="return confirm('Opuścić drużynę?')">Opuść drużynę</button>
+  </form>
 <?php endif; ?>
 
 <h2>Skład</h2>
 <div class="sklad-siatka">
-  <?php foreach ($grupy as $rola => $nicki): ?>
+  <?php foreach ($grupy as $rola => $zawodnicy): ?>
     <div class="sklad-grupa">
       <h3><?= e($naglowki[$rola]) ?></h3>
-      <?php if (!$nicki): ?><p class="przygaszony">–</p><?php endif; ?>
-      <?php foreach ($nicki as $n): ?><div class="sklad-gracz"><?= e($n) ?></div><?php endforeach; ?>
+      <?php if (!$zawodnicy): ?><p class="przygaszony">–</p><?php endif; ?>
+      <?php foreach ($zawodnicy as $z): ?>
+        <div class="sklad-gracz"><a href="zawodnik.php?id=<?= (int)$z['id_zawodnika'] ?>"><?= e($z['nick']) ?></a></div>
+      <?php endforeach; ?>
     </div>
   <?php endforeach; ?>
 </div>
