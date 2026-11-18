@@ -2,6 +2,8 @@
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/karty.php';
 require_once __DIR__ . '/druzyna_funkcje.php';
+require_once __DIR__ . '/zawodnik_funkcje.php';
+require_once __DIR__ . '/powiadomienia.php';
 
 function aktywne(string $sciezka): string {
     return ($_SERVER['SCRIPT_NAME'] === BASE_URL . '/' . $sciezka) ? ' aktywne' : '';
@@ -13,7 +15,7 @@ $wDruzynach  = strpos(basename($_SERVER['SCRIPT_NAME']), 'druzyn') === 0;
 $plik = basename($_SERVER['SCRIPT_NAME'], '.php');
 if ($wAdminie)                                                  $sek = 'admin';
 elseif (in_array($plik, ['turniej', 'turnieje'], true))         $sek = 'turnieje';
-elseif (strpos($plik, 'druzyn') === 0 || $plik === 'zaproszenia') $sek = 'druzyny';
+elseif (strpos($plik, 'druzyn') === 0 || in_array($plik, ['zaproszenia', 'moja_druzyna'], true)) $sek = 'druzyny';
 elseif ($plik === 'ranking')                                    $sek = 'ranking';
 elseif ($plik === 'liga')                                       $sek = 'liga';
 elseif ($plik === 'ogloszenia')                                 $sek = 'ogloszenia';
@@ -23,14 +25,18 @@ else                                                            $sek = 'konto';
 
 // Powiadomienia: liczba oczekujących zaproszeń do drużyn
 $mojProfil = zalogowany() ? mojZawodnik() : null;
-$mojeZaproszenia = 0;
-if ($mojProfil) {
-    try {
-        $stZ = db()->prepare("SELECT COUNT(*) FROM zaproszenie WHERE id_zawodnika = ? AND status = 'oczekujące'");
-        $stZ->execute([$mojProfil['id_zawodnika']]);
-        $mojeZaproszenia = (int)$stZ->fetchColumn();
-    } catch (PDOException $ex) { $mojeZaproszenia = 0; }
-}
+
+// Zakładka „Moja drużyna”: link prowadzi na profil własnej drużyny (albo na stronę z propozycją założenia)
+$mojaDr = $mojProfil ? druzynaZawodnika((int)$mojProfil['id_zawodnika']) : null;
+$mojaLink = $mojaDr ? BASE_URL . '/druzyna.php?id=' . (int)$mojaDr['id_druzyny'] : BASE_URL . '/moja_druzyna.php';
+$naMojejD = $plik === 'moja_druzyna'
+    || ($mojaDr && in_array($plik, ['druzyna', 'druzyna_form'], true) && (int)($_GET['id'] ?? 0) === (int)$mojaDr['id_druzyny']);
+if ($naMojejD) $wDruzynach = false;
+$zapLista = $mojProfil ? oczekujaceZaproszeniaZawodnika((int)$mojProfil['id_zawodnika']) : [];
+$mojeZaproszenia = count($zapLista);
+$noweZap = $mojProfil ? noweZaproszeniaDoPowiadomienia((int)$mojProfil['id_zawodnika'], $zapLista) : [];
+$naStronieZap = basename($_SERVER['SCRIPT_NAME']) === 'zaproszenia.php';
+$awatarGora = zalogowany() ? awatarHtml($mojProfil ?: ['nick' => uzytkownik()['nick']]) : '';
 ?>
 <!DOCTYPE html>
 <html lang="pl">
@@ -51,6 +57,9 @@ if ($mojProfil) {
       <p class="sekcja">Rywalizacja</p>
       <a class="poz<?= aktywne('turnieje.php') ?>" href="<?= BASE_URL ?>/turnieje.php">🏆 <span>Turnieje</span></a>
       <a class="poz<?= $wDruzynach ? ' aktywne' : '' ?>" href="<?= BASE_URL ?>/druzyny.php">👥 <span>Drużyny</span></a>
+      <?php if ($mojProfil): ?>
+        <a class="poz<?= $naMojejD ? ' aktywne' : '' ?>" href="<?= e($mojaLink) ?>">⭐ <span>Moja drużyna</span></a>
+      <?php endif; ?>
       <a class="poz<?= aktywne('ranking.php') ?>" href="<?= BASE_URL ?>/ranking.php">📊 <span>Ranking</span></a>
       <a class="poz<?= aktywne('liga.php') ?>" href="<?= BASE_URL ?>/liga.php">🥇 <span>Liga</span></a>
 
@@ -70,22 +79,51 @@ if ($mojProfil) {
       <span class="sciezka"><a href="<?= BASE_URL ?>/index.php">🏠</a> &rsaquo; <?= e(mb_strtoupper($tytul ?? 'Strona główna')) ?></span>
       <div class="konto">
         <?php if (zalogowany()): ?>
-          <?php if ($mojProfil): ?>
-            <a href="<?= BASE_URL ?>/zaproszenia.php">✉️ Zaproszenia<?php if ($mojeZaproszenia): ?> <span class="licznik"><?= $mojeZaproszenia ?></span><?php endif; ?></a>
-            <a href="<?= BASE_URL ?>/zawodnik.php?id=<?= (int)$mojProfil['id_zawodnika'] ?>">Mój profil</a>
-          <?php endif; ?>
-          <a class="nick" href="<?= BASE_URL ?>/konto.php">👤 <?= e(uzytkownik()['nick']) ?></a>
-          <a href="<?= BASE_URL ?>/logout.php">Wyloguj</a>
+          <details class="pm" id="profil-menu">
+            <summary class="pm-btn" aria-label="Menu profilu">
+              <span class="pm-awatar"><?= $awatarGora ?><?php if ($mojeZaproszenia): ?><span class="pm-kropka" title="Oczekujące zaproszenia"><?= $mojeZaproszenia ?></span><?php endif; ?></span>
+              <span class="pm-nick"><?= e(uzytkownik()['nick']) ?></span>
+              <span class="pm-strzalka" aria-hidden="true">▾</span>
+            </summary>
+            <div class="pm-menu">
+              <div class="pm-naglowek">
+                <?= str_replace('class="awatar ', 'class="awatar sredni ', $awatarGora) ?>
+                <div><b><?= e(uzytkownik()['nick']) ?></b><small><?= maRole('administrator') ? 'Administrator' : 'Zawodnik' ?></small></div>
+              </div>
+              <?php if ($mojProfil): ?>
+                <a href="<?= BASE_URL ?>/zawodnik.php?id=<?= (int)$mojProfil['id_zawodnika'] ?>">👤 <span>Mój profil</span></a>
+                <a href="<?= e($mojaLink) ?>">⭐ <span><?= $mojaDr ? 'Moja drużyna' : 'Drużyna' ?></span></a>
+                <a href="<?= BASE_URL ?>/zaproszenia.php">✉️ <span>Zaproszenia</span>
+                  <span class="licznik pm-licznik"<?= $mojeZaproszenia ? '' : ' hidden' ?>><?= $mojeZaproszenia ?></span></a>
+              <?php endif; ?>
+              <a href="<?= BASE_URL ?>/konto.php">⚙️ <span>Ustawienia konta</span></a>
+              <?php if (maRole('administrator')): ?>
+                <a href="<?= BASE_URL ?>/admin/index.php">🛡️ <span>Panel admina</span></a>
+              <?php endif; ?>
+              <hr>
+              <a class="pm-wyloguj" href="<?= BASE_URL ?>/logout.php">🚪 <span>Wyloguj się</span></a>
+            </div>
+          </details>
         <?php else: ?>
           <a href="<?= BASE_URL ?>/register.php">Rejestracja</a>
           <a class="przycisk maly" href="<?= BASE_URL ?>/login.php">Logowanie</a>
         <?php endif; ?>
       </div>
     </header>
+
+    <!-- Wyskakujące powiadomienia (nowe zaproszenia do drużyn) -->
+    <div class="powiad-stos" id="powiad-stos" aria-live="polite"
+         data-endpoint="<?= $mojProfil ? BASE_URL . '/zaproszenia_status.php' : '' ?>"
+         data-zaproszenia="<?= BASE_URL ?>/zaproszenia.php"
+         data-bez-toastow="<?= $naStronieZap ? '1' : '0' ?>">
+      <?php if ($noweZap && !$naStronieZap): [$tytulP, $opisP] = trescPowiadomieniaZaproszen($noweZap); ?>
+        <div class="toast" role="status">
+          <span class="toast-ikona">✉️</span>
+          <div class="toast-tresc"><b><?= e($tytulP) ?></b><span><?= e($opisP) ?></span></div>
+          <a class="toast-link" href="<?= BASE_URL ?>/zaproszenia.php">Zobacz</a>
+          <button type="button" class="toast-x" aria-label="Zamknij">&times;</button>
+        </div>
+      <?php endif; ?>
+    </div>
+
     <main class="kontener">
-    <?php if ($mojeZaproszenia && basename($_SERVER['SCRIPT_NAME']) !== 'zaproszenia.php'):
-        $n = $mojeZaproszenia;
-        $slowo = $n === 1 ? 'nowe zaproszenie' : (($n % 10 >= 2 && $n % 10 <= 4 && ($n % 100 < 12 || $n % 100 > 14)) ? 'nowe zaproszenia' : 'nowych zaproszeń'); ?>
-      <div class="powiadomienie">✉️ Masz <?= $n ?> <?= $slowo ?> do drużyny.
-        <a href="<?= BASE_URL ?>/zaproszenia.php">Zobacz</a></div>
-    <?php endif; ?>

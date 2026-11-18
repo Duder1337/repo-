@@ -1,5 +1,7 @@
 <?php
 require_once 'includes/auth.php';
+require_once 'includes/turnieje_funkcje.php';
+usunStareAnulowane();
 
 $pdo = db();
 $otwarte   = (int)$pdo->query("SELECT COUNT(*) FROM turniej WHERE status = 'otwarty'")->fetchColumn();

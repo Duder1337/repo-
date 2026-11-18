@@ -27,6 +27,7 @@ CREATE TABLE zawodnik (
   nick           VARCHAR(50) NOT NULL UNIQUE,
   imie           VARCHAR(50) NOT NULL,
   nazwisko       VARCHAR(80) NOT NULL,
+  testowy        TINYINT(1) NOT NULL DEFAULT 0,
   CONSTRAINT fk_zawodnik_uzytkownik FOREIGN KEY (id_uzytkownika)
     REFERENCES uzytkownik(id_uzytkownika) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -37,6 +38,7 @@ CREATE TABLE druzyna (
   nazwa           VARCHAR(30) NOT NULL UNIQUE,
   id_wlasciciela  INT NOT NULL,
   data_utworzenia DATE NOT NULL DEFAULT (CURRENT_DATE),
+  testowy         TINYINT(1) NOT NULL DEFAULT 0,
   CONSTRAINT chk_nazwa_dl CHECK (CHAR_LENGTH(nazwa) BETWEEN 3 AND 30),
   CONSTRAINT fk_druzyna_wlasciciel FOREIGN KEY (id_wlasciciela)
     REFERENCES uzytkownik(id_uzytkownika)
@@ -75,6 +77,10 @@ CREATE TABLE turniej (
   status            VARCHAR(20) NOT NULL DEFAULT 'szkic',
   id_administratora INT NOT NULL,
   id_zwyciezcy      INT NULL,
+  data_anulowania   DATETIME NULL,
+  podtytul          VARCHAR(150) NULL,
+  format_finalu     VARCHAR(3) NULL,
+  zasady            TEXT NULL,
   CONSTRAINT chk_limit  CHECK (limit_druzyn BETWEEN 4 AND 64),
   CONSTRAINT chk_format CHECK (format_meczu IN ('BO1','BO3','BO5')),
   CONSTRAINT chk_status_t CHECK (status IN ('szkic','otwarty','w trakcie','zakończony','anulowany')),

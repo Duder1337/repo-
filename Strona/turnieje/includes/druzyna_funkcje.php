@@ -10,7 +10,7 @@ function etykietaRoli(string $rola): string {
 
 function pobierzSklad(int $idDruzyny): array {
     $st = db()->prepare(
-        "SELECT z.id_zawodnika, z.nick, s.rola
+        "SELECT z.*, s.rola
          FROM sklad s JOIN zawodnik z ON z.id_zawodnika = s.id_zawodnika
          WHERE s.id_druzyny = ?
          ORDER BY FIELD(s.rola, 'kapitan', 'gracz', 'rezerwowy', 'trener'), z.nick"
@@ -162,4 +162,82 @@ function akceptujZaproszenie(int $idZap): string {
         if ($ex->getCode() === '23000') return 'Zawodnik należy już do drużyny.';
         throw $ex;
     }
+}
+
+/* ---------- Profil drużyny: okno zaproszeń, statystyki i karty zawodników ---------- */
+
+// Komunikat zapamiętany do następnego wyświetlenia strony (post → redirect → get)
+function flashDruzynyUstaw(array $dane): void { $_SESSION['flash_druzyna'] = $dane; }
+function flashDruzynyPobierz(): array {
+    $f = $_SESSION['flash_druzyna'] ?? [];
+    unset($_SESSION['flash_druzyna']);
+    return is_array($f) ? $f : [];
+}
+
+// Wysyła zaproszenie do drużyny. Zwraca '' po sukcesie albo komunikat błędu.
+// Nick znalezionego zawodnika trafia do $nickZawodnika.
+function wyslijZaproszenie(int $idDruzyny, string $nick, string $rola, string &$nickZawodnika = ''): string {
+    $pdo  = db();
+    $nick = trim($nick);
+    if (!in_array($rola, ['gracz', 'rezerwowy', 'trener'], true)) return 'Wybierz rolę zawodnika.';
+
+    $st = $pdo->prepare('SELECT * FROM zawodnik WHERE nick = ?');
+    $st->execute([$nick]);
+    $w = $st->fetch();
+    if (!$w) return 'Nie znaleziono zawodnika o nicku ' . $nick . '.';
+    if ($w['id_uzytkownika'] === null) return 'Zawodnik ' . $w['nick'] . ' nie ma konta, więc nie może przyjąć zaproszenia.';
+    if (druzynaZawodnika((int)$w['id_zawodnika'])) return 'Zawodnik ' . $w['nick'] . ' należy już do innej drużyny.';
+
+    $st = $pdo->prepare("SELECT 1 FROM zaproszenie WHERE id_druzyny = ? AND id_zawodnika = ? AND status = 'oczekujące'");
+    $st->execute([$idDruzyny, $w['id_zawodnika']]);
+    if ($st->fetchColumn()) return 'Zawodnik ' . $w['nick'] . ' ma już oczekujące zaproszenie od Twojej drużyny.';
+    if (liczbaWRoli($idDruzyny, $rola, true) >= LIMITY_ROL[$rola]) {
+        return 'Brak wolnych miejsc w roli: ' . etykietaRoli($rola) . ' (wliczając wysłane zaproszenia).';
+    }
+
+    $pdo->prepare('INSERT INTO zaproszenie (id_druzyny, id_zawodnika, rola, id_zapraszajacego) VALUES (?, ?, ?, ?)')
+        ->execute([$idDruzyny, $w['id_zawodnika'], $rola, uzytkownik()['id']]);
+    $nickZawodnika = $w['nick'];
+    return '';
+}
+
+function anulujZaproszenie(int $idDruzyny, int $idZaproszenia): bool {
+    $st = db()->prepare("UPDATE zaproszenie SET status = 'anulowane'
+                         WHERE id_zaproszenia = ? AND id_druzyny = ? AND status = 'oczekujące'");
+    $st->execute([$idZaproszenia, $idDruzyny]);
+    return $st->rowCount() > 0;
+}
+
+// Oczekujące zaproszenia wysłane przez drużynę
+function oczekujaceZaproszenia(int $idDruzyny): array {
+    $st = db()->prepare("SELECT z.id_zaproszenia, w.nick, z.rola, z.data_wyslania
+                         FROM zaproszenie z JOIN zawodnik w ON w.id_zawodnika = z.id_zawodnika
+                         WHERE z.id_druzyny = ? AND z.status = 'oczekujące' ORDER BY z.data_wyslania");
+    $st->execute([$idDruzyny]);
+    return $st->fetchAll();
+}
+
+// Rozegrane mecze i wygrane zawodników – jedno zapytanie dla całego składu
+function statystykiZawodnikow(array $idy): array {
+    $idy = array_values(array_map('intval', $idy));
+    if (!$idy) return [];
+    $wynik = [];
+    try {
+        $in = implode(',', array_fill(0, count($idy), '?'));
+        $st = db()->prepare("SELECT id_zawodnika, COUNT(*) AS mecze, SUM(wygrana) AS wygrane
+                             FROM udzial_zawodnika WHERE id_zawodnika IN ($in) GROUP BY id_zawodnika");
+        $st->execute($idy);
+        foreach ($st->fetchAll() as $r) {
+            $m = (int)$r['mecze']; $w = (int)$r['wygrane'];
+            $wynik[(int)$r['id_zawodnika']] = ['mecze' => $m, 'wygrane' => $w, 'procent' => $m ? (int)round(100 * $w / $m) : 0];
+        }
+    } catch (PDOException $ex) { /* brak tabeli ze statystykami – karty pokażą kreski */ }
+    return $wynik;
+}
+
+// Dwie litery do „logo” drużyny (np. „The Lycans” → „TL”)
+function inicjalyDruzyny(string $nazwa): string {
+    $slowa = preg_split('/[\s\-_]+/u', trim($nazwa), -1, PREG_SPLIT_NO_EMPTY);
+    if (count($slowa) >= 2) return mb_strtoupper(mb_substr($slowa[0], 0, 1) . mb_substr($slowa[1], 0, 1));
+    return mb_strtoupper(mb_substr($nazwa, 0, 2));
 }

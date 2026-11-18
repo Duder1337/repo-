@@ -1,7 +1,9 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/druzyna_funkcje.php';
+require_once __DIR__ . '/../includes/dane_testowe_funkcje.php';
 wymagajRoli('administrator');
+zapewnijKolumnyTestowe();
 
 $pdo = db();
 $ok = '';
@@ -54,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $druzyny = $pdo->query(
-    "SELECT d.id_druzyny, d.nazwa, u.nick AS wlasciciel,
+    "SELECT d.id_druzyny, d.nazwa, d.testowy, u.nick AS wlasciciel,
             (SELECT z.nick FROM sklad s JOIN zawodnik z ON z.id_zawodnika = s.id_zawodnika
               WHERE s.id_druzyny = d.id_druzyny AND s.rola = 'kapitan' LIMIT 1) AS kapitan,
             (SELECT COUNT(*) FROM sklad s WHERE s.id_druzyny = d.id_druzyny) AS liczba,
@@ -105,7 +107,7 @@ require __DIR__ . '/../includes/header.php';
   <tr><th>Drużyna</th><th>Właściciel</th><th>Kapitan</th><th>Skład</th><th>Turnieje</th><th>Akcje</th></tr>
   <?php foreach ($druzyny as $d): ?>
     <tr>
-      <td><a href="../druzyna.php?id=<?= (int)$d['id_druzyny'] ?>"><?= e($d['nazwa']) ?></a></td>
+      <td><a href="../druzyna.php?id=<?= (int)$d['id_druzyny'] ?>"><?= e($d['nazwa']) ?></a><?= $d['testowy'] ? ' <small class="przygaszony" title="Drużyna testowa">🧪</small>' : '' ?></td>
       <td><?= e($d['wlasciciel']) ?></td>
       <td><?= e($d['kapitan'] ?? '–') ?></td>
       <td><?= (int)$d['liczba'] ?> os.</td>

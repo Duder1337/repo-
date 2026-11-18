@@ -1,124 +1,69 @@
-// Wybór zawodników do składu drużyny przez karty i okno wyszukiwania
+// Profil drużyny: zakładki, filtr składu i okno zaproszeń (plus)
 (function () {
-  var kreator = document.querySelector('.kreator');
-  if (!kreator) return;
+  var widok = document.querySelector('.dr-widok');
+  if (!widok) return;
+  widok.classList.add('js');
 
-  var url    = kreator.dataset.szukaj;
-  var modal  = document.getElementById('modal-gracza');
-  var pole   = document.getElementById('modal-szukaj');
-  var lista  = document.getElementById('modal-wyniki');
-  var tytul  = document.getElementById('modal-tytul');
-  var karty  = document.querySelectorAll('.gcard');
-  var aktualna = null, timer = null, numer = 0;
+  /* Zakładki (zapamiętywane w #hash) */
+  var przyciski = widok.querySelectorAll('.dr-tabs button');
+  var panele = widok.querySelectorAll('.dr-panel');
 
-  function nickKarty(karta) { return karta.querySelector('input').value.trim(); }
-
-  function ustaw(karta, nick) {
-    karta.querySelector('input').value = nick;
-    karta.querySelector('.gcard-nick').textContent = nick;
-    karta.querySelector('.gcard-avatar').textContent = nick ? nick.charAt(0).toUpperCase() : '+';
-    if (nick) karta.classList.remove('pusta', 'brak'); else karta.classList.add('pusta');
+  function pokaz(nazwa) {
+    var jest = false;
+    panele.forEach(function (p) { if (p.dataset.panel === nazwa) jest = true; });
+    if (!jest) nazwa = 'sklad';
+    panele.forEach(function (p) { p.classList.toggle('aktywny', p.dataset.panel === nazwa); });
+    przyciski.forEach(function (b) { b.classList.toggle('aktywna', b.dataset.tab === nazwa); });
   }
-
-  function uzyte() {
-    var u = {};
-    karty.forEach(function (k) {
-      var n = nickKarty(k).toLowerCase();
-      if (n && k !== aktualna) u[n] = true;
+  przyciski.forEach(function (b) {
+    b.addEventListener('click', function () {
+      pokaz(b.dataset.tab);
+      if (history.replaceState) history.replaceState(null, '', '#' + b.dataset.tab);
     });
-    return u;
-  }
+  });
+  pokaz((location.hash || '').replace('#', ''));
+  window.addEventListener('hashchange', function () { pokaz((location.hash || '').replace('#', '')); });
 
-  function szukaj() {
-    var moj = ++numer;
-    fetch(url + '?q=' + encodeURIComponent(pole.value.trim()))
-      .then(function (r) { return r.json(); })
-      .then(function (nicki) {
-        if (moj !== numer) return;
-        var zajete = uzyte(), ile = 0;
-        lista.innerHTML = '';
-        nicki.forEach(function (n) {
-          if (zajete[n.toLowerCase()] || ile >= 8) return;
-          ile++;
-          var li = document.createElement('li');
-          li.textContent = n;
-          li.addEventListener('click', function () { wybierz(n); });
-          lista.appendChild(li);
-        });
-        if (!ile) {
-          var brak = document.createElement('li');
-          brak.className = 'brak-wynikow';
-          brak.textContent = 'Brak pasujących zawodników';
-          lista.appendChild(brak);
-        }
-      })
-      .catch(function () {});
-  }
+  /* Filtr składu */
+  var filtry = widok.querySelectorAll('.dr-filtry button');
+  var karty = widok.querySelectorAll('.pk-wrap');
+  filtry.forEach(function (f) {
+    f.addEventListener('click', function () {
+      filtry.forEach(function (x) { x.classList.toggle('aktywny', x === f); });
+      var w = f.dataset.filtr;
+      karty.forEach(function (k) {
+        var g = k.dataset.grupa;
+        k.hidden = !(w === 'wszyscy' || g === w || g === 'plus' && w === 'wszyscy');
+      });
+    });
+  });
 
-  function otworz(karta) {
-    aktualna = karta;
-    tytul.textContent = 'Wybierz zawodnika: ' + karta.dataset.etykieta;
-    pole.value = '';
-    lista.innerHTML = '';
-    modal.classList.add('otwarty');
-    szukaj();
-    setTimeout(function () { pole.focus(); }, 50);
-  }
+  /* Okno zaproszeń */
+  var modal = document.getElementById('modal-zaproszenie');
+  if (!modal) return;
+  var pole = modal.querySelector('input[name="nick"]');
+  var rola = modal.querySelector('select[name="rola"]');
 
-  function zamknij() {
-    modal.classList.remove('otwarty');
-    aktualna = null;
-  }
-
-  function wybierz(nick) {
-    if (aktualna) ustaw(aktualna, nick);
-    zamknij();
-  }
-
-  karty.forEach(function (karta) {
-    karta.addEventListener('click', function (e) {
-      if (e.target.closest('.gcard-x')) {
-        ustaw(karta, '');
-        e.stopPropagation();
-        return;
+  function otworz(preferowana) {
+    if (rola && preferowana) {
+      var opcja = rola.querySelector('option[value="' + preferowana + '"]');
+      if (opcja && !opcja.disabled) rola.value = preferowana;
+      else {
+        var wolna = rola.querySelector('option:not([disabled])');
+        if (wolna) rola.value = wolna.value;
       }
-      otworz(karta);
-    });
-    karta.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && e.target === karta) otworz(karta);
-    });
-  });
-
-  pole.addEventListener('input', function () {
-    clearTimeout(timer);
-    timer = setTimeout(szukaj, 200);
-  });
-  pole.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      var pierwszy = lista.querySelector('li:not(.brak-wynikow)');
-      if (pierwszy) wybierz(pierwszy.textContent);
     }
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && modal.classList.contains('otwarty')) zamknij();
+    modal.classList.add('otwarty');
+    setTimeout(function () { if (pole) pole.focus(); }, 50);
+  }
+  function zamknij() { modal.classList.remove('otwarty'); }
+
+  widok.querySelectorAll('[data-otworz-zaproszenie]').forEach(function (b) {
+    b.addEventListener('click', function () { otworz(b.dataset.rola); });
   });
   document.getElementById('modal-zamknij').addEventListener('click', zamknij);
   modal.addEventListener('click', function (e) { if (e.target === modal) zamknij(); });
-
-  // Przed wysłaniem sprawdzamy, czy podstawowy skład jest kompletny
-  kreator.addEventListener('submit', function (e) {
-    var pierwsza = null;
-    karty.forEach(function (k) {
-      if (k.dataset.wymagane === '1' && !nickKarty(k)) {
-        k.classList.add('brak');
-        if (!pierwsza) pierwsza = k;
-      }
-    });
-    if (pierwsza) {
-      e.preventDefault();
-      pierwsza.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      alert('Uzupełnij podstawowy skład: kapitan i 4 graczy.');
-    }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && modal.classList.contains('otwarty')) zamknij();
   });
 })();

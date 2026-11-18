@@ -1,5 +1,7 @@
 <?php
 require_once 'includes/auth.php';
+require_once 'includes/turnieje_funkcje.php';
+usunStareAnulowane();
 
 $statusy = ['otwarty', 'w trakcie', 'zakończony', 'anulowany'];
 $status  = $_GET['status'] ?? '';

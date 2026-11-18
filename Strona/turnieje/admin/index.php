@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/turnieje_funkcje.php';
 wymagajRoli('administrator');
+usunStareAnulowane();
 
 $pdo = db();
 $liczby = [
@@ -37,6 +39,10 @@ require __DIR__ . '/../includes/header.php';
   <a class="karta" href="ogloszenia.php">
     <div class="karta-tresc"><h3>📢 Zarządzaj ogłoszeniami</h3>
       <small>Publikowanie, edycja i usuwanie ogłoszeń</small></div>
+  </a>
+  <a class="karta" href="dane_testowe.php">
+    <div class="karta-tresc"><h3>🧪 Dane testowe</h3>
+      <small>Generowanie zawodników i gotowych drużyn na czas testów, bez zakładania kont</small></div>
   </a>
   <a class="karta" href="liga.php">
     <div class="karta-tresc"><h3>🥇 NEXORA PRO LEAGUE</h3>
