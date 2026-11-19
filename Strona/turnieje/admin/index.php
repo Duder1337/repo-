@@ -44,6 +44,10 @@ require __DIR__ . '/../includes/header.php';
     <div class="karta-tresc"><h3>🧪 Dane testowe</h3>
       <small>Generowanie zawodników i gotowych drużyn na czas testów, bez zakładania kont</small></div>
   </a>
+  <a class="karta" href="symulacja.php">
+    <div class="karta-tresc"><h3>🎮 Symulacja turnieju</h3>
+      <small>8 drużyn, drabinka, statystyki zawodników i przycisk „Symuluj następną fazę”</small></div>
+  </a>
   <a class="karta" href="liga.php">
     <div class="karta-tresc"><h3>🥇 NEXORA PRO LEAGUE</h3>
       <small>Zgłoszenia, start ligi i wpisywanie wyników</small></div>
